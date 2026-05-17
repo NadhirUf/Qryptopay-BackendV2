@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QryptoPay | Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-1: #05081f;
+      --bg-2: #0d1544;
+      --line: #29357c;
+      --text: #eef2ff;
+      --muted: #93a0d6;
+      --accent: #2ce6bd;
+      --accent-2: #42b3ff;
+      --card: #11173b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Space Grotesk', sans-serif;
+      background: radial-gradient(1000px 550px at 15% 10%, #182561 0%, transparent 60%),
+                  radial-gradient(900px 520px at 85% 90%, #0f2a70 0%, transparent 60%),
+                  linear-gradient(140deg, var(--bg-1), var(--bg-2));
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+    .box {
+      width: 100%;
+      max-width: 420px;
+      background: color-mix(in hsl, var(--card) 90%, black);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px;
+    }
+    h1 { margin: 0 0 8px; }
+    p { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+    label { display: block; font-size: 14px; margin: 12px 0 6px; color: #cbd4ff; }
+    input {
+      width: 100%; border: 1px solid #304085; background: #0c1130; color: var(--text);
+      border-radius: 10px; padding: 11px 12px; outline: none;
+    }
+    input:focus { border-color: var(--accent-2); }
+    button {
+      margin-top: 16px; width: 100%;
+      border: 0; border-radius: 10px; padding: 12px;
+      font-weight: 700; color: #04112f;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      cursor: pointer;
+    }
+    .status { margin-top: 12px; font-size: 13px; min-height: 18px; color: #ffb6b6; }
+    .back { margin-top: 14px; text-align: center; }
+    .back a { color: #9ec3ff; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Login</h1>
+    <p>Masuk untuk lanjut ke halaman admin.</p>
+
+    <form id="login-form">
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="admin@qryptopay.com" required />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="••••••••" required />
+
+      <button type="submit">Login Now</button>
+    </form>
+
+    <div id="status" class="status"></div>
+    <div class="back"><a href="./index.html">Kembali ke Landing</a></div>
+  </div>
+
+  <script>
+    const BASE_URL = 'http://localhost:8081';
+    const form = document.getElementById('login-form');
+    const statusEl = document.getElementById('status');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      statusEl.textContent = 'Memproses login...';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      try {
+        const response = await fetch(`${BASE_URL}/api/v1/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const json = await response.json();
+        if (!response.ok || json.status !== 'SUCCESS') {
+          throw new Error(json.message || 'Login gagal');
+        }
+
+        localStorage.setItem('qryptopay_user', JSON.stringify(json.data));
+        statusEl.style.color = '#89ffbd';
+        statusEl.textContent = 'Login sukses. Mengalihkan ke Admin...';
+        setTimeout(() => {
+          window.location.href = './admin.html';
+        }, 700);
+      } catch (error) {
+        statusEl.style.color = '#ffb6b6';
+        statusEl.textContent = error.message || 'Terjadi kesalahan login';
+      }
+    });
+  </script>
+</body>
+</html>
