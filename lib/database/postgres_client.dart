@@ -6,14 +6,23 @@ class PostgresClient {
     return _instance;
   }
 
-  // --- CONSTRUCTOR (Jalan saat pertama kali server nyala) ---
+// --- CONSTRUCTOR (Jalan saat pertama kali server nyala) ---
   PostgresClient._internal() {
     final env = _loadEnvWithFallback();
-    final dbHost = env['DB_HOST'] ?? 'localhost';
-    final dbPort = int.tryParse(env['DB_PORT'] ?? '5432') ?? 5432;
-    final dbName = env['DB_NAME'] ?? 'qryptopay_db';
-    final dbUser = env['DB_USER'] ?? 'postgres';
-    final dbPass = env['DB_PASS'] ?? 'password';
+
+    // 🚨 FIX: Paksa baca dari Awan dulu (Platform.environment).
+    // Kalau di Awan kosong, baru baca env lokal.
+    final dbHost =
+        Platform.environment['DB_HOST'] ?? env['DB_HOST'] ?? 'localhost';
+    final dbPort = int.tryParse(
+            Platform.environment['DB_PORT'] ?? env['DB_PORT'] ?? '5432') ??
+        5432;
+    final dbName =
+        Platform.environment['DB_NAME'] ?? env['DB_NAME'] ?? 'qryptopay_db';
+    final dbUser =
+        Platform.environment['DB_USER'] ?? env['DB_USER'] ?? 'postgres';
+    final dbPass =
+        Platform.environment['DB_PASS'] ?? env['DB_PASS'] ?? 'password';
 
     print('🏊 Membuat Pool Database ke $dbHost:$dbPort/$dbName...');
 
@@ -31,7 +40,7 @@ class PostgresClient {
         ],
         settings: const PoolSettings(
           maxConnectionCount: 5,
-          sslMode: SslMode.disable,
+          sslMode: SslMode.disable, // Biarkan disable dulu
         ),
       );
     } catch (e) {
